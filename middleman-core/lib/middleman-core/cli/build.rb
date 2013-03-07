@@ -252,15 +252,20 @@ module Middleman::Cli
       end
 
       # Loop over all the paths and build them.
-      resources.each do |resource|
-        next if @config[:glob] && !File.fnmatch(@config[:glob], resource.destination_path)
+      built_resources = []
+      while resources.any?
+        resources.each do |resource|
+          next if @config[:glob] && !File.fnmatch(@config[:glob], resource.destination_path)
 
-        output_path = base.render_to_file(resource)
+          output_path = base.render_to_file(resource)
 
-        if cleaning?
-          pn = Pathname(output_path)
-          @cleaning_queue.delete(pn.realpath) if pn.exist?
+          if cleaning?
+            pn = Pathname(output_path)
+            @cleaning_queue.delete(pn.realpath) if pn.exist?
+          end
         end
+        built_resources += resources
+        resources = @app.sitemap.resources - built_resources
       end
 
       ::Middleman::Profiling.report("build")
