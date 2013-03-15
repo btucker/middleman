@@ -252,8 +252,8 @@ module Middleman::Cli
       end
 
       # Loop over all the paths and build them.
-      built_resources = []
-      while resources.any?
+      built_resources = Set.new
+      until resources.empty?
         resources.each do |resource|
           next if @config[:glob] && !File.fnmatch(@config[:glob], resource.destination_path)
 
@@ -264,8 +264,8 @@ module Middleman::Cli
             @cleaning_queue.delete(pn.realpath) if pn.exist?
           end
         end
-        built_resources += resources
-        resources = @app.sitemap.resources - built_resources
+        built_resources.merge(resources)
+        resources = @app.sitemap.resources.reject{|r| built_resources.include?(r)}
       end
 
       ::Middleman::Profiling.report("build")
