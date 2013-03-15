@@ -144,6 +144,10 @@ module Middleman
         end
         File.join(app.respond_to?(:http_prefix) ? app.http_prefix : '/', url_path)
       end
+
+      def hash
+        @destination_paths.hash
+      end
     end
   end
 end
